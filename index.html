@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f0f">
+<title>LIFT</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f0f;--s:#1a1a1a;--s2:#212121;--b:#2e2e2e;--a:#c8f135;--w:#ff5f3d;--t:#f0f0f0;--m:#888;--m2:#555;--good:#4ade80;--mid:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--t);font-family:'Inter',sans-serif;font-size:15px;min-height:100dvh}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--s);border-top:1px solid var(--b);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:50}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 8px 10px;background:none;border:none;color:var(--m);cursor:pointer;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.nb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+.nb.on{color:var(--a)}
+.scr{display:none;max-width:480px;margin:0 auto;padding:0 0 100px}
+.scr.on{display:block}
+.ph{padding:24px 16px 16px}
+.ph h1{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.03em;line-height:1}
+.ph h1 em{color:var(--a);font-style:normal}
+.ph-sub{color:var(--m);font-size:11px;letter-spacing:.08em;margin-top:4px;font-weight:500}
+.ex-block{margin:0 16px 12px;background:var(--s);border:1px solid var(--b);border-radius:14px;overflow:hidden}
+.ex-top{display:flex;align-items:center;padding:14px 14px 8px;gap:8px}
+.ex-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.03em;flex:1;color:var(--t)}
+.ex-prev{font-size:12px;color:var(--m);padding:0 14px 10px}
+.ex-prev strong{color:var(--t);font-weight:600}
+.stall{display:inline-block;background:#ff5f3d18;border:1px solid #ff5f3d55;border-radius:6px;padding:2px 7px;font-size:11px;color:var(--w);font-weight:600;margin-left:6px}
+.set-list{padding:0 14px 4px}
+.set-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b)}
+.set-item:last-child{border-bottom:none}
+.set-n{width:22px;font-size:11px;color:var(--m);text-align:center;flex-shrink:0;font-weight:500}
+.set-info{flex:1;font-size:14px;font-weight:600;color:var(--t)}
+.set-info span{color:var(--m);font-weight:400;font-size:12px}
+.form-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;flex-shrink:0}
+.form-badge.good{background:#4ade8022;color:var(--good);border:1px solid #4ade8044}
+.form-badge.mid{background:#fbbf2422;color:var(--mid);border:1px solid #fbbf2444}
+.form-badge.bad{background:#f8717122;color:var(--bad);border:1px solid #f8717144}
+.del-set{background:none;border:none;color:var(--m2);cursor:pointer;padding:5px 7px;font-size:14px;border-radius:6px;line-height:1}
+.del-set:active{color:var(--w)}
+.add-row{padding:8px 14px 14px}
+.add-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.inp-wrap{display:flex;flex-direction:column;gap:4px}
+.inp-wrap label{font-size:11px;color:var(--m);font-weight:500}
+.inp-wrap input{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:10px;color:var(--t);font-family:'Inter',sans-serif;font-size:18px;font-weight:600;text-align:center;outline:none;width:100%;-webkit-appearance:none;transition:border-color .15s}
+.inp-wrap input:focus{border-color:var(--a)}
+.inp-wrap input::placeholder{color:var(--m2)}
+.form-btns{display:flex;gap:6px;margin-bottom:10px}
+.form-btns label{font-size:11px;color:var(--m);font-weight:500;display:block;margin-bottom:6px}
+.fb{flex:1;padding:9px 4px;border-radius:8px;border:1px solid var(--b);background:var(--s2);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.fb.good{color:var(--good)}.fb.mid{color:var(--mid)}.fb.bad{color:var(--bad)}
+.fb.sel-good{background:#4ade8022;border-color:var(--good)}
+.fb.sel-mid{background:#fbbf2422;border-color:var(--mid)}
+.fb.sel-bad{background:#f8717122;border-color:var(--bad)}
+.log-btn{width:100%;padding:13px;border:none;border-radius:8px;background:var(--a);color:#0f0f0f;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;cursor:pointer}
+.log-btn:active{opacity:.7}
+.del-ex{background:none;border:none;color:var(--m2);cursor:pointer;padding:5px 7px;font-size:16px;border-radius:6px;line-height:1}
+.del-ex:active{color:var(--w)}
+.add-ex-section{padding:4px 16px 8px}
+.add-ex-row{display:flex;gap:8px}
+.add-ex-row input{flex:1;background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:13px 14px;color:var(--t);font-family:'Inter',sans-serif;font-size:15px;font-weight:500;outline:none;-webkit-appearance:none;transition:border-color .15s}
+.add-ex-row input::placeholder{color:var(--m2)}
+.add-ex-row input:focus{border-color:var(--a)}
+.add-ex-btn{background:var(--a);color:#0f0f0f;border:none;border-radius:10px;padding:0 18px;font-family:'Bebas Neue',sans-serif;font-size:22px;cursor:pointer;flex-shrink:0}
+.add-ex-btn:active{opacity:.7}
+.save-wrap{padding:10px 16px 4px}
+.save-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--a);color:#0f0f0f;font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.06em;cursor:pointer}
+.save-btn:active{opacity:.75}
+hr.div{border:none;border-top:1px solid var(--b);margin:4px 16px 14px}
+.h-day{padding:0 16px 22px}
+.h-date{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--a);padding:12px 0 8px;border-bottom:1px solid var(--b);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.h-del{background:none;border:none;color:var(--m2);cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;padding:4px 8px;border-radius:6px;font-weight:500}
+.h-del:active{color:var(--w)}
+.h-ex{margin-bottom:12px}
+.h-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.03em;margin-bottom:6px;color:var(--t)}
+.h-set-row{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;padding:4px 0}
+.h-set-n{width:22px;font-size:11px;color:var(--m);text-align:center}
+.h-set-info{flex:1;color:var(--t)}
+.h-set-info span{color:var(--m);font-weight:400}
+.ic{margin:0 16px 10px;border-radius:12px;padding:14px 16px;border:1px solid}
+.ic.w{border-color:#ff5f3d44;background:#ff5f3d06}
+.ic.g{border-color:#c8f13544;background:#c8f13506}
+.ic.n{border-color:var(--b);background:var(--s)}
+.ic-ico{font-size:18px;margin-bottom:5px}
+.ic-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.03em;margin-bottom:4px}
+.ic-title.w{color:var(--w)}.ic-title.g{color:var(--a)}
+.ic-body{font-size:13px;color:var(--m);line-height:1.6}
+.ic-body strong{color:var(--t);font-weight:600}
+.ic-form-note{margin-top:8px;font-size:12px;padding:6px 10px;border-radius:6px;background:var(--s2);color:var(--m)}
+.ic-form-note span{font-weight:600}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--a);color:#0f0f0f;padding:9px 20px;border-radius:8px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.06em;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;padding:50px 20px;color:var(--m)}
+.empty-big{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--b);margin-bottom:8px}
+.empty p{font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div id="scr-log" class="scr on">
+  <div class="ph">
+    <h1>TODAY'S <em>LIFT</em></h1>
+    <div class="ph-sub" id="today-date"></div>
+  </div>
+  <div id="ex-container"></div>
+  <hr class="div">
+  <div class="add-ex-section">
+    <div class="add-ex-row">
+      <input id="ex-input" type="text" placeholder="Exercise name..." autocomplete="off" autocorrect="off" autocapitalize="words">
+      <button class="add-ex-btn" onclick="addEx()">ADD</button>
+    </div>
+  </div>
+  <div class="save-wrap" id="save-wrap" style="display:none">
+    <button class="save-btn" onclick="saveWorkout()">SAVE WORKOUT</button>
+  </div>
+</div>
+
+<div id="scr-history" class="scr">
+  <div class="ph"><h1>HISTORY</h1><div class="ph-sub">All sessions</div></div>
+  <div id="history-container"></div>
+</div>
+
+<div id="scr-insights" class="scr">
+  <div class="ph"><h1>INSIGHTS</h1><div class="ph-sub">Strength progress</div></div>
+  <div id="insights-container"></div>
+</div>
+
+<nav>
+  <button class="nb on" id="nav-log" onclick="goTo('log')">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg>Log
+  </button>
+  <button class="nb" id="nav-history" onclick="goTo('history')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>History
+  </button>
+  <button class="nb" id="nav-insights" onclick="goTo('insights')">
+    <svg viewBox="0 0 24 24"><path d="M3 17l4-8 4 4 4-6 4 10"/></svg>Insights
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let workouts = JSON.parse(localStorage.getItem('lft5_w') || '[]');
+// sess = [{name, sets:[{reps,weight,form}], pw, pr, form}]
+let sess = [];
+
+function persist() { localStorage.setItem('lft5_w', JSON.stringify(workouts)); }
+
+function goTo(name) {
+  ['log','history','insights'].forEach(n => {
+    document.getElementById('scr-'+n).classList.toggle('on', n===name);
+    document.getElementById('nav-'+n).classList.toggle('on', n===name);
+  });
+  if (name==='history') renderHistory();
+  if (name==='insights') renderInsights();
+}
+
+function addEx(name) {
+  const inp = document.getElementById('ex-input');
+  name = (name || inp.value).trim();
+  if (!name) return;
+  if (sess.find(e => e.name.toLowerCase()===name.toLowerCase())) { toast('Already added!'); inp.value=''; return; }
+  const lw = lastWeight(name);
+  sess.push({name, sets:[], pw:lw, pr:5, form:'good'});
+  inp.value=''; renderEx(); checkSave();
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.ex-block');
+    if (cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'nearest'});
+  }, 60);
+}
+
+function lastWeight(name) {
+  for (let i=workouts.length-1;i>=0;i--) {
+    const e = workouts[i].exercises.find(x=>x.name===name);
+    if (e&&e.sets&&e.sets.length) return Math.max(...e.sets.map(s=>s.weight||0));
+  }
+  return 0;
+}
+
+function prevInfo(name) {
+  const bests = [];
+  workouts.forEach(w => {
+    const e = w.exercises.find(x=>x.name===name);
+    if (e&&e.sets&&e.sets.length) bests.push(Math.max(...e.sets.map(s=>s.weight||0)));
+  });
+  if (!bests.length) return null;
+  const stalled = bests.length>=3 && bests[bests.length-1]===bests[bests.length-2] && bests[bests.length-2]===bests[bests.length-3];
+  return {best:Math.max(...bests), stalled};
+}
+
+function delEx(idx) { sess.splice(idx,1); renderEx(); checkSave(); }
+
+function delSet(ei, si) { sess[ei].sets.splice(si,1); redrawBlock(ei); checkSave(); }
+
+function setForm(ei, val) {
+  sess[ei].form = val;
+  ['good','mid','bad'].forEach(f => {
+    const btn = document.getElementById(`fb-${ei}-${f}`);
+    if (btn) btn.className = `fb ${f}${val===f?' sel-'+f:''}`;
+  });
+}
+
+function logSet(ei) {
+  const e = sess[ei];
+  const r = parseInt(document.getElementById('r'+ei).value)||0;
+  const w = parseFloat(document.getElementById('w'+ei).value)||0;
+  if (!r) { toast('Enter reps!'); return; }
+  e.sets.push({reps:r, weight:w, form:e.form||'good'});
+  e.pr=r; e.pw=w;
+  redrawBlock(ei); checkSave();
+}
+
+function cachePending(ei) {
+  const e = sess[ei];
+  const ri=document.getElementById('r'+ei), wi=document.getElementById('w'+ei);
+  if(ri) e.pr=parseInt(ri.value)||5;
+  if(wi) e.pw=parseFloat(wi.value)||0;
+}
+
+function renderEx() {
+  document.getElementById('ex-container').innerHTML = sess.map((e,i)=>block(e,i)).join('');
+}
+
+function redrawBlock(ei) {
+  const el = document.getElementById('ex-block-'+ei);
+  if (el) el.outerHTML = block(sess[ei], ei);
+}
+
+function block(e, ei) {
+  const prev = prevInfo(e.name);
+  let prevHTML = '';
+  if (prev) prevHTML = `<div class="ex-prev">Best: <strong>${prev.best} lbs</strong>${prev.stalled?'<span class="stall">STALLED</span>':''}</div>`;
+
+  const setsHTML = e.sets.map((s,si) => `
+    <div class="set-item">
+      <div class="set-n">${si+1}</div>
+      <div class="set-info">${s.weight||'BW'} lbs <span>× ${s.reps} reps</span></div>
+      <span class="form-badge ${s.form}">${s.form==='mid'?'MED':s.form.toUpperCase()}</span>
+      <button class="del-set" onclick="delSet(${ei},${si})">✕</button>
+    </div>`).join('');
+
+  const cf = e.form||'good';
+  return `<div class="ex-block" id="ex-block-${ei}">
+    <div class="ex-top">
+      <div class="ex-title">${e.name}</div>
+      <button class="del-ex" onclick="delEx(${ei})">✕</button>
+    </div>
+    ${prevHTML}
+    ${e.sets.length?`<div class="set-list">${setsHTML}</div>`:''}
+    <div class="add-row">
+      <div class="add-inputs">
+        <div class="inp-wrap">
+          <label>Weight (lbs)</label>
+          <input id="w${ei}" type="number" inputmode="decimal" value="${e.pw||''}" placeholder="0" min="0" step="2.5" onchange="cachePending(${ei})">
+        </div>
+        <div class="inp-wrap">
+          <label>Reps</label>
+          <input id="r${ei}" type="number" inputmode="numeric" value="${e.pr||5}" min="1" max="99" onchange="cachePending(${ei})">
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;color:var(--m);font-weight:500;margin-bottom:6px">Form</div>
+        <div class="form-btns">
+          <button id="fb-${ei}-good" class="fb good${cf==='good'?' sel-good':''}" onclick="setForm(${ei},'good')">✓ Good</button>
+          <button id="fb-${ei}-mid"  class="fb mid${cf==='mid'?' sel-mid':''}"   onclick="setForm(${ei},'mid')">~ Medium</button>
+          <button id="fb-${ei}-bad"  class="fb bad${cf==='bad'?' sel-bad':''}"   onclick="setForm(${ei},'bad')">✕ Bad</button>
+        </div>
+      </div>
+      <button class="log-btn" onclick="logSet(${ei})">LOG SET</button>
+    </div>
+  </div>`;
+}
+
+function checkSave() {
+  document.getElementById('save-wrap').style.display = sess.some(e=>e.sets.length>0) ? 'block' : 'none';
+}
+
+function saveWorkout() {
+  const valid = sess.filter(e=>e.sets.length>0).map(e=>({name:e.name,sets:e.sets}));
+  if (!valid.length) { toast('Log some sets first!'); return; }
+  workouts.push({date:new Date().toISOString(), exercises:valid});
+  persist(); sess=[]; renderEx(); checkSave();
+  toast('SAVED 💪');
+}
+
+function renderHistory() {
+  const c = document.getElementById('history-container');
+  if (!workouts.length) { c.innerHTML=`<div class="empty"><div class="empty-big">ZERO</div><p>No workouts yet.</p></div>`; return; }
+  c.innerHTML = [...workouts].reverse().map((w,ri) => {
+    const i = workouts.length-1-ri;
+    const date = new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const exHTML = w.exercises.map(ex => `
+      <div class="h-ex">
+        <div class="h-name">${ex.name}</div>
+        ${ex.sets.map((s,si)=>`
+          <div class="h-set-row">
+            <div class="h-set-n">${si+1}</div>
+            <div class="h-set-info">${s.weight||'BW'} lbs <span>× ${s.reps} reps</span></div>
+            <span class="form-badge ${s.form||'good'}">${s.form==='mid'?'MED':(s.form||'good').toUpperCase()}</span>
+          </div>`).join('')}
+      </div>`).join('');
+    return `<div class="h-day">
+      <div class="h-date">${date}<button class="h-del" onclick="delWorkout(${i})">delete</button></div>
+      ${exHTML}
+    </div>`;
+  }).join('');
+}
+
+function delWorkout(i) {
+  if (!confirm('Delete this workout?')) return;
+  workouts.splice(i,1); persist(); renderHistory();
+}
+
+function renderInsights() {
+  const c = document.getElementById('insights-container');
+  if (workouts.length<2) { c.innerHTML=`<div class="empty"><div class="empty-big">NEED MORE</div><p>Log at least 2 sessions to see insights.</p></div>`; return; }
+
+  const exMap = {};
+  workouts.forEach(w => w.exercises.forEach(ex => {
+    if (!exMap[ex.name]) exMap[ex.name]=[];
+    const best = Math.max(...ex.sets.map(s=>s.weight||0));
+    const fc = {good:0,mid:0,bad:0};
+    ex.sets.forEach(s=>{ if(s.form) fc[s.form]++; });
+    exMap[ex.name].push({best, fc});
+  }));
+
+  const ins=[];
+  const totalSets = workouts.reduce((a,w)=>a+w.exercises.reduce((b,e)=>b+e.sets.length,0),0);
+  ins.push({cl:'n',i:'📊',title:`${workouts.length} sessions · ${totalSets} sets`,body:'Tracking max strength. Stalls flagged below.'});
+
+  Object.entries(exMap).forEach(([name,history])=>{
+    if (history.length<2) return;
+    const bests = history.map(h=>h.best);
+    const latest = bests[bests.length-1];
+    const prev   = bests[bests.length-2];
+    const allTime = Math.max(...bests);
+    let stallCount=0;
+    for(let i=bests.length-1;i>0;i--){ if(bests[i]<=bests[i-1]) stallCount++; else break; }
+    const gained = latest-prev;
+
+    let goodC=0,midC=0,badC=0;
+    history.forEach(h=>{goodC+=h.fc.good||0;midC+=h.fc.mid||0;badC+=h.fc.bad||0;});
+    const total=goodC+midC+badC;
+    let formNote='';
+    if(total>0){
+      const bp=Math.round(badC/total*100), gp=Math.round(goodC/total*100);
+      if(bp>=30) formNote=`<div class="ic-form-note">⚠️ Form: <span style="color:var(--bad)">${bp}% of sets rated Bad</span> — may be limiting strength.</div>`;
+      else if(gp>=80) formNote=`<div class="ic-form-note">✓ Form: <span style="color:var(--good)">${gp}% Good</span></div>`;
+    }
+
+    if(stallCount>=2) ins.push({cl:'w',i:'🔴',title:name,body:`<strong>STALLED — no increase in ${stallCount} sessions.</strong> Max: ${latest} lbs. Try +2.5 lbs, deload, or change rep range.${formNote}`});
+    else if(gained>0) ins.push({cl:'g',i:'📈',title:name,body:`<strong>+${gained} lbs</strong> since last session. All-time best: ${allTime} lbs.${formNote}`});
+    else if(gained<0) ins.push({cl:'w',i:'📉',title:name,body:`Down ${Math.abs(gained)} lbs from last session. Best ever: ${allTime} lbs.${formNote}`});
+    else ins.push({cl:'n',i:'➡️',title:name,body:`Holding at ${latest} lbs. Push for a new PR next session.${formNote}`});
+  });
+
+  c.innerHTML = ins.map(x=>`<div class="ic ${x.cl}">
+    <div class="ic-ico">${x.i}</div>
+    <div class="ic-title ${x.cl}">${x.title}</div>
+    <div class="ic-body">${x.body}</div>
+  </div>`).join('');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2100);
+}
+
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+document.getElementById('ex-input').addEventListener('keydown',e=>{ if(e.key==='Enter') addEx(); });
+</script>
+</body>
+</html>
